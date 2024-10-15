@@ -129,7 +129,23 @@
               console.debug(codec, error);
             }
           }
- 
+
+          let videoDecoderSupportHardware;
+
+          if ("VideoDecoder" in window) {
+            try {
+              ({ supported: videoDecoderSupportHardware } =
+                await VideoDecoder.isConfigSupported({
+                  codec,
+                  width: 128,
+                  height: 128,
+                  hardwareAcceleration: "prefer-hardware",
+                }));
+            } catch (error) {
+              console.debug(codec, error);
+            }
+          }  
+
           checks.push([
             name,
             codec,
@@ -137,6 +153,7 @@
             MediaSource.isTypeSupported(mimeType),
             videoEncoderSupport,
             videoDecoderSupport,
+            videoDecoderSupportHardware,
           ]);
         }
 
@@ -154,12 +171,15 @@
             checks.map((check) => !!check[4]).filter(Boolean).length
           })</th>
           <th>VideoDecoder.<br>isConfigSupported<br>(${
-            checks.map((check) => !!check[4]).filter(Boolean).length
+            checks.map((check) => !!check[5]).filter(Boolean).length
+          })</th>
+          <th>VideoDecoder.<br>isConfigSupported<br>(prefer-hardware)<br>(${
+            checks.map((check) => !!check[6]).filter(Boolean).length
           })</th>
         </tr>
         ${checks
           .map(
-            ([name, codec, canPlay, mediaSource, videoEncoder, videoDecoder]) =>
+            ([name, codec, canPlay, mediaSource, videoEncoder, videoDecoder, videoDecoderSupportHardware]) =>
               `<tr class="${container}">${[
                 ["name", name],
                 ["codec", codec],
@@ -167,6 +187,7 @@
                 ["mediaSource", mediaSource ? "✅" : "❌"],
                 ["videoEncoder", videoEncoder ? "✅" : "❌"],
                 ["videoDecoder", videoDecoder ? "✅" : "❌"],
+                ["videoDecoderSupportHardware", videoDecoderSupportHardware ? "✅" : "❌"],
               ]
                 .map(([c, d]) => `<td class=${c}>${d}</td>`)
                 .join("")}</tr>`
@@ -178,7 +199,7 @@
       tbodyElement.innerHTML = table;
 
       const list = new List(mainElement, {
-        valueNames: ["name", "codec", "canPlay", "mediaSource", "videoEncoder", "videoDecoder"],
+        valueNames: ["name", "codec", "canPlay", "mediaSource", "videoEncoder", "videoDecoder", "videoDecoderSupportHardware"],
         page: 100000,
         fuzzySearch: { threshold: 0.3 },
       });
