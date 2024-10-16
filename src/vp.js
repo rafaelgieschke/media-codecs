@@ -57,7 +57,8 @@ const formatCodec = (cccc, PP, LL, DD) => `${cccc}.${PP}.${LL}.${DD}`;
  * @returns {import("../types.js").MediaCodecItem[]}
  */
 const getAllItems = () =>
-  VP_CODECS.map((codec) =>
+  [{name: "VP8", codec: "vp8"}, {name: "VP9", codec: "vp9"},
+  ...VP_CODECS.map((codec) =>
     VP_PROFILES.map((profile) =>
       VP_LEVELS.map((level) =>
         VP_BIT_DEPTH.map((bitDepth) => ({
@@ -71,7 +72,7 @@ const getAllItems = () =>
         })),
       ),
     ),
-  ).flat(4);
+  ).flat(4)];
 
 /**
  * Get a codec parameter string
