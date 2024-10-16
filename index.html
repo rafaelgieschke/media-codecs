@@ -92,6 +92,17 @@
 
       const containers = Object.keys(MediaCodecs);
 
+      const decodingInfo = async (contentType) => await navigator.mediaCapabilities.decodingInfo({
+        type: "media-source",
+        video: {
+          contentType,
+          width: 128,
+          height: 128,
+          bitrate: 10000,
+          framerate: 30,
+        }
+      });
+
       for (const container of containers) {
         const items = MediaCodecs[container].getAllItems();
 
@@ -154,6 +165,7 @@
             videoEncoderSupport,
             videoDecoderSupport,
             videoDecoderSupportHardware,
+            await decodingInfo(mimeType).then(v => v.powerEfficient),
           ]);
         }
 
@@ -176,10 +188,13 @@
           <th>VideoDecoder.<br>isConfigSupported<br>(prefer-hardware)<br>(${
             checks.map((check) => !!check[6]).filter(Boolean).length
           })</th>
+          <th>MediaCapabilities.<br>decodingInfo<br>(powerEfficient)<br>(${
+            checks.map((check) => !!check[7]).filter(Boolean).length
+          })</th>
         </tr>
         ${checks
           .map(
-            ([name, codec, canPlay, mediaSource, videoEncoder, videoDecoder, videoDecoderSupportHardware]) =>
+            ([name, codec, canPlay, mediaSource, videoEncoder, videoDecoder, videoDecoderSupportHardware, decodingInfoPowerEfficient]) =>
               `<tr class="${container}">${[
                 ["name", name],
                 ["codec", codec],
@@ -188,6 +203,7 @@
                 ["videoEncoder", videoEncoder ? "✅" : "❌"],
                 ["videoDecoder", videoDecoder ? "✅" : "❌"],
                 ["videoDecoderSupportHardware", videoDecoderSupportHardware ? "✅" : "❌"],
+                ["decodingInfo", decodingInfoPowerEfficient ? "✅" : "❌"],
               ]
                 .map(([c, d]) => `<td class=${c}>${d}</td>`)
                 .join("")}</tr>`
@@ -199,7 +215,7 @@
       tbodyElement.innerHTML = table;
 
       const list = new List(mainElement, {
-        valueNames: ["name", "codec", "canPlay", "mediaSource", "videoEncoder", "videoDecoder", "videoDecoderSupportHardware"],
+        valueNames: ["name", "codec", "canPlay", "mediaSource", "videoEncoder", "videoDecoder", "videoDecoderSupportHardware", "decodingInfoPowerEfficient"],
         page: 100000,
         fuzzySearch: { threshold: 0.3 },
       });
